@@ -126,3 +126,50 @@ UPDATE NO ACTION
 
 -- каскадное удаление -при удалении данных из одной талицы удаляются связанные данные из другой 
 https://geekbrains.ru/chapters/1166
+
+
+--==inner INNER JOIN (Объеденение данных при выборке)
+https://geekbrains.ru/chapters/1170
+-- При выборе данных из таблицы product прикрепляем столбцы из category связыва их по определенным столбцам on product.category_id = category.id; 
+select * from product 
+	inner join category on product.category_id = category.id;
+
+-- При выборе данных из таблицы product указываем нужные столбцы и прикрепляем столбцы из category связыва их по определенным столбцам on product.category_id = category.id;     
+select product.id, price, name from product  
+	inner join category on product.category_id = category.id; 
+
+-- объеденение таблиц в обратном порядке сначала категории потом продукты
+select * from category  
+	 inner join product on product.category_id = category.id;
+     
+-- объеденение и ограничивание по where
+select * from product  
+	inner join category on product.category_id = category.id
+    where discount <= 5;
+    
+-- множественное объеденение
+select * from product  
+	inner join category on product.category_id = category.id 
+    inner join brand on brand.id = product.brand_id
+    inner join product_type on product_type.id = product.product_type_id;
+    
+-- множественное объеденение с указанием столбцов
+select product.id, brand.name, product_type.name, category.name, product.price from product  
+	inner join category on product.category_id = category.id 
+    inner join brand on brand.id = product.brand_id
+    inner join product_type on product_type.id = product.product_type_id; 
+-- объедение слева
+select * from category
+	left join product on product.category_id = category.id;
+
+-- объедение слева    
+select * from category
+	left join product on product.category_id = category.id
+    where product.id is null;
+
+-- объедение справа
+select * from category
+	right join product on product.category_id = category.id
+    where product.id is null;
+    
+    
