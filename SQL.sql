@@ -125,11 +125,11 @@ ON DELETE NO ACTION
 UPDATE NO ACTION
 
 -- каскадное удаление -при удалении данных из одной талицы удаляются связанные данные из другой 
-https://geekbrains.ru/chapters/1166
+-- https://geekbrains.ru/chapters/1166
 
 
 --==inner INNER JOIN (Объеденение данных при выборке)
-https://geekbrains.ru/chapters/1170
+-- https://geekbrains.ru/chapters/1170
 -- При выборе данных из таблицы product прикрепляем столбцы из category связыва их по определенным столбцам on product.category_id = category.id; 
 select * from product 
 	inner join category on product.category_id = category.id;
@@ -158,7 +158,9 @@ select product.id, brand.name, product_type.name, category.name, product.price f
 	inner join category on product.category_id = category.id 
     inner join brand on brand.id = product.brand_id
     inner join product_type on product_type.id = product.product_type_id; 
--- объедение слева
+
+-- https://geekbrains.ru/chapters/1171
+-- объедение слева (в запрос обязаны попасть все данные из таблицы категории)
 select * from category
 	left join product on product.category_id = category.id;
 
@@ -172,4 +174,70 @@ select * from category
 	right join product on product.category_id = category.id
     where product.id is null;
     
+-- склейка двух выводов
+select * from product_type where id = 1
+-- (склейка)
+union
+select * from product_type where id = 2;
+
+
+select * from `order`
+	left join order_products on order_products.order_id = `order`.id
+    left join product on order_products.product_id = product.id
+-- (склейка)
+union
+
+select * from `order`	
+	inner join order_products on order_products.order_id = `order`.id
+    right join product on order_products.product_id = product.id
+
+-- АГРЕГИРУЮЩИЕ ФУНКЦИИ
+use shop;
+
+SELECT * FROM product;
+SELECT count(*) FROM product where product.price < 10000;
+SELECT sum(price), min(price), max(price)  
+
+-- count(*) - СКОЛЬКО ВСЕГО КОЛ-ВО
+-- sum(price) - сумма для какого-то столбца
+-- итд
+
+SELECT * FROM product;
+SELECT count(*) FROM product where product.price < 10000;
+
+-- as total_price - переменование столбца в выводе
+SELECT sum(price) as total_price, min(price) as min_price, max(price) as max_price FROM product;
+    where `order`.id is null; 
+
+-- ГРУПИРОВКА
+-- https://geekbrains.ru/chapters/1174
+-- группировка строк по повторяющемуся значению
+SELECT `order`.user_name, sum(price * `count`) as total_price  from `order` 
+	inner join order_products on order_products.order_id = `order`.id
+    inner join product on product.id = order_products.product_id
+    group by `order`.user_name;
     
+SELECT `order`.user_name, max(price), sum(`count`)  from `order` 
+	inner join order_products on order_products.order_id = `order`.id
+    inner join product on product.id = order_products.product_id
+    group by `order`.user_name;
+
+-- having - ограничения для сгрупировных даных
+SELECT `order`.user_name, max(price), sum(`count`) as order_count from `order` 
+	inner join order_products on order_products.order_id = `order`.id
+    inner join product on product.id = order_products.product_id
+    -- where user_name like 'Р’%'
+    
+    group by `order`.user_name
+    having order_count >= 5;
+
+-- ИНДЕКСЫ ДЛЯ УСКОРЕНИЯ РАБОТЫ бд
+-- https://geekbrains.ru/chapters/1175
+
+-- ТРАНЗАКЦИИ
+select * from `shop`.`user_bank_account`;
+
+start transaction;
+	update `shop`.`user_bank_account` set money = money - 100 where id = 1;
+    	update `shop`.`user_bank_account` set money = money + 100 where id = 2;
+commit;
